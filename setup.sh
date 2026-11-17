@@ -21,7 +21,7 @@
 set -euo pipefail
 
 CF_REPO="${CF_REPO:-HitamLegit6777/cfast}"
-CF_TAG="${CF_TAG:-v1.1.0-managed}"
+CF_TAG="${CF_TAG:-v1.2.0-managed}"
 CF_PROFILE="${CF_PROFILE:-profile_safari.json}"
 PREFIX="${PREFIX:-/opt/cfast}"
 PORT="${PORT:-8810}"

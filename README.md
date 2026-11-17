@@ -29,7 +29,7 @@ bash setup.sh --check        # installs cfast + API + deps, resolves a test link
 python3 inshorturl_http.py https://inshorturl.in/Tddfjl8
 ```
 
-`setup.sh` fetches from [`HitamLegit6777/cfast`](https://github.com/HitamLegit6777/cfast/releases/tag/v1.1.0-managed):
+`setup.sh` fetches from [`HitamLegit6777/cfast`](https://github.com/HitamLegit6777/cfast/releases/tag/v1.2.0-managed):
 
 - `challenge` — prebuilt linux-x64 pure-protocol solver (~24 MB)
 - `profile_safari.json` + `profile_safari/`, `profile_fast.json` + `profile_fast/`
@@ -90,8 +90,8 @@ that VM in Rust. Two facts matter operationally:
 
 | Symptom | Cause / fix |
 |---|---|
-| `expected one program runner, found 0` | CF rotates the orchestrator script; retried 3× automatically. Persistent? rebuild cfast from source. |
-| `probe N matches no known collector` | Same rotation, also retried. |
+| `expected one program runner, found 0` | Fixed in cfast `v1.2.0-managed`: this build's challenge tree installs the VM runner inside a sequence/helper call. `setup.sh` pins that tag; re-run it, or upgrade `CF_TAG`. |
+| `probe N matches no known collector` | CF rotates the challenge script per request; retried automatically. |
 | `verify page not served` | `Referer` did not survive; re-run. If it persists, the filler step order changed. |
 | `solver API unreachable` | `systemctl status cfast` / `journalctl -u cfast -n 50`. |
 | `cf_clearance` not printed | Check the profile dir next to the JSON (`profile_safari/answers.json`); cfast resolves `answers` relative to the profile file. |
