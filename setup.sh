@@ -94,7 +94,23 @@ done
 # ── solver API ───────────────────────────────────────────────────────
 $SUDO curl -fsSL --retry 3 "$raw/solver_api.py" -o "$PREFIX/solver_api.py"
 
-if [ "${NO_SYSTEMD:-0}" != 1 ] && command -v systemctl >/dev/null && [ -d /run/systemd/system ]; then
+# A port already in use would leave the resolver talking to whatever else is
+# listening there, so refuse rather than start a second bind attempt.
+if command -v ss >/dev/null && ss -ltn 2>/dev/null | grep -q ":$PORT "; then
+    if ss -ltn 2>/dev/null | grep -q ":$PORT " && curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null 2>&1; then
+        say "port $PORT already serves a solver API — reusing it"
+        PORT_BUSY=0
+    else
+        die "port $PORT is taken by another process (not a cfast API).
+Pick a free one:  PORT=8899 bash $0"
+    fi
+else
+    PORT_BUSY=1
+fi
+
+if [ "$PORT_BUSY" != 1 ]; then
+    say "reusing the solver API already answering on :$PORT"
+elif [ "${NO_SYSTEMD:-0}" != 1 ] && command -v systemctl >/dev/null && [ -d /run/systemd/system ]; then
     $SUDO tee "$UNIT" >/dev/null <<EOF
 [Unit]
 Description=cfast pure-protocol solver API
@@ -159,7 +175,13 @@ for _ in $(seq 1 20); do
     sleep 1
 done
 curl -fsS "http://127.0.0.1:$PORT/health" >/dev/null 2>&1 \
-    || die "solver API did not come up; check: journalctl -u cfast -n 50"
+    || die "solver API did not come up on :$PORT.
+  systemd: journalctl -u cfast -n 50
+  nohup:   tail $PREFIX/api.log"
+
+export CFast_BIN="$PREFIX/challenge"
+export CFast_PROFILE="$PREFIX/$CF_PROFILE"
+export CFast_API="http://127.0.0.1:$PORT"
 
 if [ "$CHECK" = 1 ]; then
     say "resolving one live shortlink"
@@ -169,7 +191,11 @@ if [ "$CHECK" = 1 ]; then
 fi
 
 say "done"
-cat <<'EOF'
+cat <<EOF
+
+  export CFast_BIN=$CFast_BIN
+  export CFast_PROFILE=$CFast_PROFILE
+  export CFast_API=$CFast_API
 
   python3 inshorturl_http.py https://inshorturl.in/<alias>
   python3 inshorturl_bypass.py <alias>      # browser fallback (needs camoufox)
