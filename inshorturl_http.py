@@ -33,7 +33,7 @@ and cf_clearance is bound to the UA that solved it. mahitimanch accepts any
 non-Firefox UA, so one client can do everything.
 
 Requirements:
-  - cfast solver binary + profile installed under /opt/cfast (install.sh)
+  - cfast solver binary + profile installed under /opt/cfast (setup.sh)
   - solver API on localhost:8810 (cfast.service)
   - httpx[http2]
 

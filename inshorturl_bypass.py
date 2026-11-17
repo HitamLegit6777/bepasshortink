@@ -30,6 +30,10 @@ handed to the browser: the final page is POST-response-only, so the browser
 would start over at Step 1. Doing them in the browser is therefore both
 cheaper and correct — and the 10s "Human Verify" timer can be skipped in-page.
 
+This is the fallback lane. inshorturl_http.py does the whole chain with plain
+HTTP (cfast answers both Cloudflare gates) in ~20-35 s and needs no browser;
+use this one when cfast is unavailable or when debugging a changed flow.
+
 Usage:
     python3 inshorturl_bypass.py https://inshorturl.in/Tddfjl8
     python3 inshorturl_bypass.py Tddfjl8 --json
